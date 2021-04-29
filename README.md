@@ -34,5 +34,5 @@ If you are running the code against a newly released 5-year ACS dataset, do the 
 2. Open the R file (File -> Open File)
 3. Run the code by clicking the Source button or Ctrl+A followed by Ctrl+Enter. 
 
-##Attempts to automate
+## Attempts to automate
 Currently parts of this project are done by joining the output tables to tiger line files based on census provided GEOID. This is being refied to export directly using the tigris package. In addtion fields were renamed for easy of user, a compehensive guide to fields used is avaible as its own table.
