@@ -4,7 +4,7 @@ library(tidycensus); library(tidyverse); library(tigris); library(dplyr); librar
 
 getwd()
 
-census_api_key("219399afeaa3b3c28f7b5351b56bb92d7d0f576d", overwrite = TRUE)
+census_api_key("INSERT_API_KEY_HERE", overwrite = TRUE)
 
 lep_year <- 2019
 lep_states <- c("PA", "NJ")
