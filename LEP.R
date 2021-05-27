@@ -1,8 +1,8 @@
 getwd()
 
 #census keys
-census_api_key("219399afeaa3b3c28f7b5351b56bb92d7d0f576d", overwrite = TRUE)
-ckey <- "219399afeaa3b3c28f7b5351b56bb92d7d0f576d"
+census_api_key("Insert API key here", overwrite = TRUE)
+ckey <- "Insert API key here"
 
 #grab that data!
 pumas <- get_acs(geography = "public use microdata area",
