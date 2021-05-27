@@ -24,7 +24,7 @@ Install each package from R Studio's console (typically at the bottom of the scr
 
 If you are running the code against a newly released 5-year ACS dataset, do the following:
 
-1. Make a copy of the latest .R file (e.g. script-2019.R) and rename it for the year you are working on. (This is to ensure that any schema changes for a particular 5-year dataset are kept with the code for that set.)
+1. Make a copy of the latest variables.R file  and rename it for the year you are working on. (This is to ensure that any schema changes for a particular 5-year dataset are kept with the code for that set.)
 2. Adjust the value for the `lep_year` variable (to be the end year of the dataset).
 3. Verify the field names (listed under the `# Fields` section). Follow the link provided to check the schema for that dataset.
 
@@ -32,7 +32,8 @@ If you are running the code against a newly released 5-year ACS dataset, do the 
 
 1. Open RStudio. 
 2. Open the R file (File -> Open File)
-3. Run the code by clicking the Source button or Ctrl+A followed by Ctrl+Enter. 
+3. Start with the variable.r file running it in its entirety then run the dataCollection.r files
+4. Run the code by clicking the Source button or Ctrl+A followed by Ctrl+Enter.
 
 ## Attempts to automate
-Currently parts of this project are done by joining the output tables to tiger line files based on census provided GEOID. This is being refied to export directly using the tigris package. In addtion fields were renamed for easy of user, a compehensive guide to fields used is avaible as its own table.
+Currently parts of this project were done by joining the output tables to tiger line files based on census provided GEOID. This has been refined to export directly using the tigris package. In addtion fields were renamed for easy of user, a compehensive guide to fields used is avaible at data.census.gov .
