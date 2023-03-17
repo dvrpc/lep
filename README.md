@@ -2,6 +2,7 @@
 # Indicators of Potential Disadvantage
 
 This project automates parts of DVRPC's Limited english profenency (LEP) analysis, including data download, processing, and export. 
+The data is based on the American Community Survey 5 year Estimates for Tract and Public Use Microdata Area (PUMAs) geographies.
 
 ## Getting the Code and Software
 
