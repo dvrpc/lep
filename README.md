@@ -13,7 +13,7 @@ This project automates parts of DVRPC's Limited english profenency (LEP) analysi
 
 The R script has the following dependencies: 
 
-plyr; here; sf; summarytools; survey; srvyr; sjmisc; tidycensus; tidyverse; tigris; dplyr; descr; sp; rgdal; raster
+`plyr; here; sf; summarytools; survey; srvyr; sjmisc; tidycensus; tidyverse; tigris; dplyr; descr; sp; rgdal; raster`
 
 If you have not previously installed the dependencies, you will need to do so. If you try to run the script without installing the packages, you will get an error message like 
 `Error in library (name_of_package) : there is no package called 'name_of_package'`.
