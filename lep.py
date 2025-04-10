@@ -11,13 +11,14 @@ census_url = f"https://api.census.gov/data/{year}/acs/acs5"
 census_key = ""
 
 con = duckdb.connect(database=':memory:')
-con.execute("INSTALL spatial; LOAD spatial; INSTALL httpfs; LOAD httpfs;")
+con.execute("INSTALL httpfs; LOAD httpfs;")
 
 
 def get_field_map(census_url):
     """
     get actual names for census field codes and cleans field names
     """
+    print(f"Grabbing variables...\n")
     variables = requests.get(census_url + "/variables.json")
     var_data = variables.json()
     field_map = {}
@@ -28,7 +29,6 @@ def get_field_map(census_url):
             if key.endswith('E'):
                 moe_key = key[:-1] + 'M'  # replace 'E' with 'M'
                 field_map[moe_key] = new_name + '_moe'
-    print(f"Grabbed variables...\n")
     return field_map
     
 
@@ -39,40 +39,54 @@ def acs_tables(api_url, params, group, geo):
     # census api response to json
     response = requests.get(api_url, params=params).json()
     header_row = response[0]
-
-    # filter fields
+    data_rows = response[1:]
+    
     filtered_header = []
     for field in header_row:
-        if group.startswith('C'):
-            if not field.endswith(('EA', 'M', 'MA', 'NAME', 'GEO_ID')):
-                filtered_header.append(field)
-        else:
-            if not field.endswith(('EA', 'MA', 'NAME', 'GEO_ID')):
-                filtered_header.append(field)
-                
-    # filter records
-    filtered_records = []
-    for record in response[1:]:
-        filtered_record = {}
-        for field, value in zip(header_row, record):
-            if field in filtered_header:
-                filtered_record[field] = value
-        filtered_records.append(filtered_record)       
+        # keep GEO_ID or any field that doesn't end with these suffixes
+        if 'GEO_ID' in field or not any(field.endswith(suffix) for suffix in ('EA', 'M', 'MA', 'NAME')):
+            filtered_header.append(field)
 
-    # table name based on geo
+    field_types = {}
+    for field in filtered_header:
+        idx = header_row.index(field)
+        if idx < len(data_rows[0]):
+            sample_value = data_rows[0][idx]
+            # try to convert to int - if it fails, it's probably a string
+            try:
+                int(sample_value)
+                field_types[field] = 'INT'
+            except (ValueError, TypeError):
+                field_types[field] = 'VARCHAR'
+    
+    # build table creation fields with proper types
+    table_fields = []
+    field_names = []
+    for field in filtered_header:
+        clean_name = field_map.get(field, field).replace(' ', '_')
+        field_names.append(clean_name)
+        field_type = field_types.get(field, 'VARCHAR') # default to VARCHAR if unsure
+        table_fields.append(f"{clean_name} {field_type}")
+    
+    # create the table
     table_name = geo.replace(' ', '_')
-
-    # field names replace spaces with underscores or remove spaces
-    field_names = [field_map.get(field, field).replace(' ', '_') for field in filtered_header]
-
-    # create the table with modified field names
-    con.execute(f'CREATE TABLE "{table_name}_{group}" ({", ".join([f"{field.replace(' ', '_')} INT" for field in field_names])})')
-
+    create_statement = f'CREATE TABLE "{table_name}_{group}" ({", ".join(table_fields)})'
+    con.execute(create_statement)
+    
+    # insert data
     print(f"Loading census table {table_name}_{group} to duckdb...\n")
-    # insert statement with modified field names
     insert_statement = f'INSERT INTO "{table_name}_{group}" VALUES ({", ".join(["?" for _ in field_names])})'
-    for record in filtered_records:
-        values = [record.get(field, None) for field in filtered_header]
+    
+    for record in data_rows:
+        # filter and prepare values
+        values = []
+        for field in filtered_header:
+            idx = header_row.index(field)
+            if idx < len(record):
+                values.append(record[idx])
+            else:
+                values.append(None)
+        
         con.execute(insert_statement, values)
 
 
@@ -86,12 +100,8 @@ def run_sql(sql, geo):
          sql = sql.replace('table_name', geo)
          con.execute(sql)
 
-os.makedirs('output', exist_ok=True)
 
-# load gis census boundary to DuckDB
-print(f"Loading gis data to duckdb...\n")
-con.execute("CREATE TABLE public_use_microdata_area_geom AS SELECT statefp20 as statefp, pumace20 as public_use_microdata_areace, geoid20 as geoid, geom FROM ST_Read('https://arcgis.dvrpc.org/portal/rest/services/Demographics/census_pumas_2020/FeatureServer/0/query?where=dvrpc_reg=%27y%27&outfields=statefp20,pumace20,geoid20&outsr=26918&f=geojson');")
-con.execute("CREATE TABLE tract_geom AS SELECT * FROM ST_Read('https://arcgis.dvrpc.org/portal/rest/services/Demographics/census_tracts_2020/FeatureServer/0/query?where=dvrpc_reg=%27y%27&outfields=statefp,tractce,geoid&outsr=26918&f=geojson');")
+os.makedirs('output', exist_ok=True)
 
 field_map = get_field_map(census_url)
 
@@ -118,11 +128,8 @@ for group, geo in groups.items():
         table_name = f'{geo}_{group}'
         acs_tables(census_url, params, group, geo)
 
-print(f"Generating geojson output...\n")
-con.execute("COPY public_use_microdata_area_gis TO 'output/lep_puma.geojson' WITH (FORMAT GDAL, DRIVER 'GeoJSON');")
-con.execute("COPY tract_gis TO 'output/lep_tract.geojson' WITH (FORMAT GDAL, DRIVER 'GeoJSON');")
+print(f"Generating output...\n")
+con.execute("COPY public_use_microdata_area_lep TO 'output/lep_puma.csv' WITH (HEADER, DELIMITER ',');")
+con.execute("COPY tract_lep TO 'output/lep_tract.csv' WITH (HEADER, DELIMITER ',');")
 
-print(f"PUMA summary...\n")
-with open('sql/long_puma_calcs.sql', 'r') as file:
-    sql = file.read()
-    con.sql(sql).write_csv("output/long_puma_calcs.csv")
+con.close()

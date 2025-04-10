@@ -1,6 +1,6 @@
 # Limited English Proficiency (LEP) Calculations and Outputs
 
-This project automates DVRPC's Limited English Proficiency (LEP) analysis, including data download, processing, and output of geospatial datasets. This analysis is based on the [US Census American Community Survey 5 Year Estimates](https://www.census.gov/data/developers/data-sets/acs-5year.html) for Tract and Public Use Microdata Area (PUMAs) geographies.
+This project automates DVRPC's Limited English Proficiency (LEP) analysis, including data download, processing, and output of datasets that can be joined to their respective census geographies. This analysis is based on the [US Census American Community Survey 5 Year Estimates](https://www.census.gov/data/developers/data-sets/acs-5year.html) for Tract and Public Use Microdata Area (PUMAs) geographies.
 
 
 ### Run
@@ -36,7 +36,7 @@ This project automates DVRPC's Limited English Proficiency (LEP) analysis, inclu
 
 ## Output
 ```
-./output/lep_puma.geojson
-./output/lep_tract.geojson
+./output/lep_puma.csv
+./output/lep_tract.csv
 ./output/long_puma_calcs.csv
 ```

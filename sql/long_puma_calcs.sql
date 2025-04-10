@@ -46,8 +46,6 @@ WITH
                 other_and_unspecified_languages_lim AS other_unspecified
             FROM
                 public_use_microdata_area_B16001 c
-                JOIN public_use_microdata_area_geom g ON c.state = g.statefp
-                AND c.public_use_microdata_area = g.public_use_microdata_areace
         ) ON spanish,
         chinese,
         vietnamese,
@@ -109,8 +107,6 @@ SELECT
             SUM(estimatetotal)
         FROM
             public_use_microdata_area_B16001 c
-            JOIN public_use_microdata_area_geom g ON c.state = g.statefp
-            AND c.public_use_microdata_area = g.public_use_microdata_areace
     ) * 100 AS percent_total,
     lep_total / (
         SELECT
