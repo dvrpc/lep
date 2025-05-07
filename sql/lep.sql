@@ -1,4 +1,4 @@
-CREATE TABLE table_name_gis AS
+CREATE TABLE table_name_lep AS
 WITH
     a AS (
         SELECT
@@ -56,8 +56,7 @@ WITH
             END AS arlime_5p
         FROM
             a
-    ), 
-	c AS (
+    )
 		SELECT 
 			*,
 		    CASE
@@ -91,12 +90,4 @@ WITH
 		            arabic_lim
 		        ) AS max_lim
 		    FROM b
-		) AS max_lim)
-SELECT
-    c.*,
-    g.geoid,
-    g.geom
-FROM
-    c
-    JOIN main.table_name_geom g ON c.state = g.statefp
-    AND c.table_name = g.table_namece;
+		) AS max_lim;
